@@ -5,7 +5,6 @@
 
 #define ERR_CLIENT_CREATE_SOCKET 1
 #define ERR_CLIENT_CONNECT_SOCKET 2
-#define ERR_CLIENT_INVALID_SOCKET 3
 
 
 typedef struct client client;

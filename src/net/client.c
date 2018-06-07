@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/socket.h>
-#include <arpa/inet.h>
 
 
 struct client {
@@ -34,9 +33,6 @@ int client_create(
 
 
 int client_close(client *cl) {
-    if (cl == NULL) {
-        return ERR_CLIENT_INVALID_SOCKET;
-    }
     close(cl->sockfd);
     free(cl);
     return 0;
