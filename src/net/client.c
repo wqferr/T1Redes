@@ -20,12 +20,12 @@ int client_create(
     cl->sockfd = socket(AF_INET, socktype, 0);
     if (cl->sockfd == -1) {
         free(cl);
-        return ERR_SOCKET_CREATE;
+        return ERR_CLIENT_CREATE_SOCKET;
     }
     if (connect(cl->sockfd, serveraddr, addrlen) < 0) {
         close(cl->sockfd);
         free(cl);
-        return ERR_SOCKET_CONNECT;
+        return ERR_CLIENT_CONNECT_SOCKET;
     }
 
     *clref = cl;
@@ -35,7 +35,7 @@ int client_create(
 
 int client_close(client *cl) {
     if (cl == NULL) {
-        return ERR_SOCKET_INVALID;
+        return ERR_CLIENT_INVALID_SOCKET;
     }
     close(cl->sockfd);
     free(cl);
