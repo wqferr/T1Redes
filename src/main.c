@@ -126,11 +126,11 @@ int startServer(int port) {
 
     fprintf(stderr, "Awaiting message... ");
     fprintf(stderr, "status: %d\n", server_recv(sv, 0, buf, BUF_SIZE, &msglen));
+    printf("Client said: \"%s\"\n", buf);
 
     strcpy(buf, "Hello, client, this is server!");
     fprintf(stderr, "Sending message... ");
     fprintf(stderr, "status: %d\n", server_send(sv, 0, buf, strlen(buf)));
-    printf("Client said: \"%s\"\n", buf);
 
     server_close(sv);
     free(buf);
