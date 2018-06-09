@@ -315,6 +315,14 @@ run:
 	@$(RUN_CMD) | tee $(STDOUT_LOG)
 	@printf "====================\n"
 
+run-server:
+	@$(RUN_CMD) -s | tee $(STDOUT_LOG)
+	@printf "====================\n"
+
+run-client:
+	@$(RUN_CMD) -c 127.0.0.1 | tee $(STDOUT_LOG)
+	@printf "====================\n"
+
 valgrind: run
 
 gdb: run
