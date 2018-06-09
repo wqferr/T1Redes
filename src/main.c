@@ -2,14 +2,20 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
 
 #include "net/server.h"
 #include "net/client.h"
+#include "net/address.h"
 
 #define DEFAULT_PORT 7277
 #define DEFAULT_SERVER_IP "127.0.0.1"
 
+#define BUF_SIZE 256
+
 #define EXIT_INVALID_PORT 1
+#define EXIT_COULDNT_CONNECT 2
 
 int startClient(const char *serverip, int port);
 int startServer(int port);
@@ -59,14 +65,32 @@ int main(int argc, char *argv[]) {
 
 
 int startClient(const char *serverip, int port) {
-    fprintf(stderr, "starting client\n");
-    fprintf(stderr, "connecting to server at %s:%d...\n", serverip, port);
+    client *cl;
+    char *sendbuf;
+    struct sockaddr_in svaddr;
+
+    fprintf(stderr, "Starting client...\n");
+    fprintf(stderr, "Connecting to server at %s:%d...\n", serverip, port);
+
+    svaddr.sin_family = AF_INET;
+    svaddr.sin_addr.s_addr = htonl(iptoint(serverip));
+    svaddr.sin_port = htons(port);
+
+    if (client_create(&cl, (struct sockaddr *) &svaddr, sizeof(svaddr), SOCK_STREAM) != 0) {
+        fprintf(stderr, "Couldn't connect to server. Terminating.")
+        return EXIT_COULDNT_CONNECT;
+    }
+
+    sendbuf = calloc(1, BUF_SIZE);
+
+    free(sendbuf);
+    client_close(cl);
 
     return EXIT_SUCCESS;
 }
 
 
 int startServer(int port) {
-    fprintf(stderr, "starting server on port %d\n", port);
+    fprintf(stderr, "Starting server on port %d...\n", port);
     return EXIT_SUCCESS;
 }
