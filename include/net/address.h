@@ -1,6 +1,8 @@
 #ifndef ADDRESS_H
 #define ADDRESS_H
 
-int iptoint(const char *ipstr);
+#include <stdint.h>
+
+uint32_t iptoint(const char *ipstr);
 
 #endif
