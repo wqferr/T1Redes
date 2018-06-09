@@ -4,3 +4,5 @@
 /build/*
 !**/.gitkeep
 out.log
+/.vscode/*
+.gitignore
