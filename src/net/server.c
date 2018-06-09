@@ -59,6 +59,7 @@ int server_awaitClients(server *sv, int n) {
     while (sv->nclients < n) {
         client = accept(sv->sockfd, NULL, 0);
         if (client >= 0) {
+            sv->clients[sv->nclients] = client;
             sv->nclients++;
         }
     }
