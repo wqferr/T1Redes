@@ -67,7 +67,8 @@ int main(int argc, char *argv[]) {
 
 int startClient(const char *serverip, int port) {
     client *cl;
-    char *sendbuf;
+    char *buf;
+    size_t msglen;
     struct sockaddr_in svaddr;
 
     fprintf(stderr, "Starting client...\n");
@@ -82,10 +83,18 @@ int startClient(const char *serverip, int port) {
         return EXIT_COULDNT_CONNECT;
     }
 
-    sendbuf = calloc(1, BUF_SIZE);
+    fprintf(stderr, "Connection successful.\n");
+    buf = calloc(1, BUF_SIZE);
+    
+    strcpy(buf, "Hello, server, this is client!");
+    fprintf(stderr, "Sending message... ");
+    fprintf(stderr, "status: %d\n", client_send(cl, buf, strlen(buf)));
 
-    free(sendbuf);
+    fprintf(stderr, "Awaiting server message... ");
+    fprintf(stderr, "status: %d\n", client_recv(cl, buf, BUF_SIZE, &msglen));
+    printf("Server said: \"%s\"\n", buf);
     client_close(cl);
+    free(buf);
 
     return EXIT_SUCCESS;
 }
@@ -93,7 +102,8 @@ int startClient(const char *serverip, int port) {
 
 int startServer(int port) {
     server *sv;
-    char *sendbuf;
+    char *buf;
+    size_t msglen;
     struct sockaddr_in svaddr;
 
     fprintf(stderr, "Starting server on port %d...\n", port);
@@ -106,11 +116,24 @@ int startServer(int port) {
         fprintf(stderr, "Couldn't start server. Terminating.\n");
         return EXIT_COULDNT_START_SERVER;
     }
+    fprintf(stderr, "Server started.\n");
 
-    sendbuf = calloc(1, BUF_SIZE);
+    buf = calloc(1, BUF_SIZE);
 
-    free(sendbuf);
+    fprintf(stderr, "Awaiting clients... ");
+    fprintf(stderr, "status: %d\n", server_awaitClients(sv, 1));
+    fprintf(stderr, "Client found.\n");
+
+    fprintf(stderr, "Awaiting message... ");
+    fprintf(stderr, "status: %d\n", server_recv(sv, 0, buf, BUF_SIZE, &msglen));
+
+    strcpy(buf, "Hello, client, this is server!");
+    fprintf(stderr, "Sending message... ");
+    fprintf(stderr, "status: %d\n", server_send(sv, 0, buf, strlen(buf)));
+    printf("Client said: \"%s\"\n", buf);
+
     server_close(sv);
+    free(buf);
 
     return EXIT_SUCCESS;
 }
