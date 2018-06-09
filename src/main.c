@@ -11,6 +11,9 @@
 
 #define EXIT_INVALID_PORT 1
 
+int startClient(const char *serverip, int port);
+int startServer(int port);
+
 int main(int argc, char *argv[]) {
     int c;
     enum {
@@ -18,6 +21,7 @@ int main(int argc, char *argv[]) {
         SERVER
     } hosttype = SERVER; // Start server by default
     int port = DEFAULT_PORT;
+    int status;
     char *serverip = DEFAULT_SERVER_IP;
 
     while ((c = getopt(argc, argv, "sc:p:")) != -1) {
@@ -45,12 +49,24 @@ int main(int argc, char *argv[]) {
     }
 
     if (hosttype == CLIENT) {
-        fprintf(stderr, "starting client\n");
-        fprintf(stderr, "connecting to server at %s:%d...\n", serverip, port);
-        
+        status = startClient(serverip, port);
         free(serverip);
     } else {
-        fprintf(stderr, "starting server on port %d\n", port);
+        status = startServer(port);
     }
+    return status;
+}
+
+
+int startClient(const char *serverip, int port) {
+    fprintf(stderr, "starting client\n");
+    fprintf(stderr, "connecting to server at %s:%d...\n", serverip, port);
+
+    return EXIT_SUCCESS;
+}
+
+
+int startServer(int port) {
+    fprintf(stderr, "starting server on port %d\n", port);
     return EXIT_SUCCESS;
 }
