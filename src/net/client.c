@@ -40,7 +40,9 @@ int client_close(client *cl) {
 
 
 int client_send(client *cl, const void *msg, size_t msglen) {
-    write(cl->sockfd, msg, msglen);
+    if (write(cl->sockfd, msg, msglen) < 0) {
+        return ERR_CLIENT_SOCKET_CLOSED;
+    }
     return 0;
 }
 
