@@ -16,6 +16,7 @@
 
 #define EXIT_INVALID_PORT 1
 #define EXIT_COULDNT_CONNECT 2
+#define EXIT_COULDNT_START_SERVER 3
 
 int startClient(const char *serverip, int port);
 int startServer(int port);
@@ -77,7 +78,7 @@ int startClient(const char *serverip, int port) {
     svaddr.sin_port = htons(port);
 
     if (client_create(&cl, (struct sockaddr *) &svaddr, sizeof(svaddr), SOCK_STREAM) != 0) {
-        fprintf(stderr, "Couldn't connect to server. Terminating.")
+        fprintf(stderr, "Couldn't connect to server. Terminating.\n");
         return EXIT_COULDNT_CONNECT;
     }
 
@@ -91,6 +92,25 @@ int startClient(const char *serverip, int port) {
 
 
 int startServer(int port) {
+    server *sv;
+    char *sendbuf;
+    struct sockaddr_in svaddr;
+
     fprintf(stderr, "Starting server on port %d...\n", port);
+
+    svaddr.sin_family = AF_INET;
+    svaddr.sin_addr.s_addr = htonl(INADDR_ANY);
+    svaddr.sin_port = htons(port);
+
+    if (server_create(&sv, (struct sockaddr *) &svaddr, sizeof(svaddr), SOCK_STREAM) != 0) {
+        fprintf(stderr, "Couldn't start server. Terminating.\n");
+        return EXIT_COULDNT_START_SERVER;
+    }
+
+    sendbuf = calloc(1, BUF_SIZE);
+
+    free(sendbuf);
+    server_close(sv);
+
     return EXIT_SUCCESS;
 }
