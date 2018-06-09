@@ -70,10 +70,10 @@ int server_send(server *sv, int clientid, const void *msg, size_t msglen) {
     if (clientid < 0 || clientid >= sv->nclients) {
         return ERR_SERVER_NO_SUCH_CLIENT;
     }
-    if (write(sv->clients[clientid], msg, msglen) > 0) {
-        return 0;
+    if (write(sv->clients[clientid], msg, msglen) < 0) {
+        return ERR_SERVER_SOCKET_CLOSED;
     }
-    return ERR_SERVER_SOCKET_CLOSED;
+    return 0;
 }
 
 int server_recv(server *sv, int clientid, void *buf, size_t bufsize, size_t *nread) {
