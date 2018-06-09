@@ -9,7 +9,6 @@
 #define DEFAULT_PORT 7277
 #define DEFAULT_SERVER_IP "127.0.0.1"
 
-#define EXIT_SUCCESS 0
 #define EXIT_INVALID_PORT 1
 
 int main(int argc, char *argv[]) {
