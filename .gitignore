@@ -1,8 +1,0 @@
-/src/.obj/*
-/src/.dep/*
-/lib/*
-/build/*
-!**/.gitkeep
-out.log
-/.vscode/*
-.gitignore
