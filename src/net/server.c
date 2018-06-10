@@ -25,6 +25,10 @@ int server_create(
         free(sv);
         return ERR_SERVER_CREATE_SOCKET;
     }
+
+    int enable = 1;
+    setsockopt(sv->sockfd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int));
+
     if (bind(sv->sockfd, serveraddr, addrlen) < 0) {
         close(sv->sockfd);
         free(sv);
