@@ -372,7 +372,7 @@ int startServer(int port) {
     // memcpy(player2_board_y, int_buf, sizeof(int)*NUMBERBOATS*5);
 
     for(int i=0; i<NUMBERBOATS; i++) {
-        for(int j=0; j<5; i++) {
+        for(int j=0; j<5; j++) {
             fprintf(stderr, "p2: (%d - ", player2_board_x[i*5 + j]);
             fprintf(stderr, "%d)\n", player2_board_y[i*5 + j]);
         }
