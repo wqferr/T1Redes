@@ -33,8 +33,12 @@ void drawBoard(int **board, int y, int x) {
 				addch(' ');
 			else if (board[i][j] == 1)
 				addch('o');
+			else if (board[i][j] == 2)
+				addch('x');
+			else if (board[i][j] == 3)
+				addch('.');
 			else
-				addch('X');
+				addch('*');
 		}
 		addch(ACS_VLINE);
 	}

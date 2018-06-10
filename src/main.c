@@ -76,7 +76,7 @@ int startClient(const char *serverip, int port) {
     struct sockaddr_in svaddr;
     int row, col, i = 0, j = 0, state = 0, selectx = 0, selecty = 0, now = 0, direction = 0;
     int boats[] = {5, 4, 4, 3, 3, 3, 2, 2, 2, 2};
-    int **board;
+    int **board, **boardenemy;
     int *boats_x_coords, *boats_y_coords;
 
     fprintf(stderr, "Starting client...\n");
@@ -106,8 +106,10 @@ int startClient(const char *serverip, int port) {
 
     // initialize interface
     board = (int **) calloc(BOARDSIZEY, sizeof(int *));
+    boardenemy = (int **) calloc(BOARDSIZEY, sizeof(int *));
     for (int k = 0; k < BOARDSIZEY; k++) {
         board[k] = (int *) calloc(BOARDSIZEX, sizeof(int));
+        boardenemy[k] = (int *) calloc(BOARDSIZEX, sizeof(int));
     }
 
     boats_x_coords = (int *) malloc(sizeof(int)*NUMBERBOATS*5);
@@ -137,7 +139,7 @@ int startClient(const char *serverip, int port) {
         else if (ch == KEY_DOWN) {
             direction = 0;
             
-            if (state == 0) {
+            if (state == 0 || state == 3) {
                 if (i < BOARDSIZEY-1) {
                     i++;
                 }   
@@ -146,7 +148,7 @@ int startClient(const char *serverip, int port) {
         else if (ch == KEY_UP) {
             direction = 1;
 
-            if (state == 0) {
+            if (state == 0 || state == 3) {
                 if (i > 0) {
                     i--;
                 }   
@@ -155,7 +157,7 @@ int startClient(const char *serverip, int port) {
         else if (ch == KEY_RIGHT) {
             direction = 2;
 
-            if (state == 0) {
+            if (state == 0 || state == 3) {
                 if (j < BOARDSIZEX-1) {
                     j++;
                 }   
@@ -164,7 +166,7 @@ int startClient(const char *serverip, int port) {
         else if (ch == KEY_LEFT) {
             direction = 3;
 
-            if (state == 0) {
+            if (state == 0 || state == 3) {
                 if (j > 0) {
                     j--;
                 }   
@@ -248,11 +250,17 @@ int startClient(const char *serverip, int port) {
                     now++;
 
                     if (now >= NUMBERBOATS) {
-                        state = 3;
+                        state = 4;
                         client_send(cl, boats_x_coords, sizeof(int) * NUMBERBOATS * 5);
                         client_send(cl, boats_y_coords, sizeof(int) * NUMBERBOATS * 5);
                     }
                 }
+            }
+            else if (state == 3) {
+                state = 4;
+                // insira aqui mandar para o puto
+                boardenemy[i][j] = 2; // Acertou.
+                boardenemy[i][j] = 3; // Errou.
             }
         }
         else if (ch == KEY_RESIZE) {
@@ -263,7 +271,7 @@ int startClient(const char *serverip, int port) {
         getmaxyx(stdscr, row, col);
 
         drawBoard(board, row/2-BOARDSIZEY, col/2-2*BOARDSIZEX-2);
-        drawBoard(board, row/2-BOARDSIZEY, col/2+2);
+        drawBoard(boardenemy, row/2-BOARDSIZEY, col/2+2);
 
         if (state == 0) {
             drawSquare(row/2-BOARDSIZEY+2*i, col/2-2*BOARDSIZEX-2+2*j);
