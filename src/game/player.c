@@ -81,6 +81,8 @@ void drawSquareSelected(int y, int x) {
 void drawLog(char **log) {
 	for (int i = 0; i < LOGSIZE; i++) {
 		move(i, 0);
+		wprintw(stdscr, "                                                  ");
+		move(i, 0);
 		wprintw(stdscr, "%s", log[i]);
 	}
 }
