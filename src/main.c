@@ -455,7 +455,7 @@ int startServer(int port) {
 	int *player1_hitvec = (int *) calloc(NUMBERBOATS*5, sizeof(int));
 	int *player2_hitvec = (int *) calloc(NUMBERBOATS*5, sizeof(int));
 
-	while(TRUE) {
+	while(!game_over(player1_hitvec, player2_hitvec)) {
 		const int p_turn = 1;
 		const int p_not_turn = 0;
 		int *action = (int *) malloc(sizeof(int) * 2);
@@ -475,16 +475,18 @@ int startServer(int port) {
 		server_send(sv, p2, &hit, sizeof(int));
 		server_send(sv, p2, action, sizeof(int)*2);
 
-		fprintf(stderr, "Sending message... status: %d\n", server_send(sv, p2, &p_turn, sizeof(int)));
-		fprintf(stderr, "Sending message... status: %d\n", server_send(sv, p1, &p_not_turn, sizeof(int)));
-		fprintf(stderr, "Awaiting player response.. status: %d\n", server_recv(sv, p2, action, sizeof(int)*2, &msglen));
-		if(p1 == 1)
-			hit = check_hit(action, player1_board_x, player1_board_y, player1_hitvec);
-		else
-			hit = check_hit(action, player2_board_x, player2_board_y, player2_hitvec);
-		server_send(sv, p2, &hit, sizeof(int));
-		server_send(sv, p1, &hit, sizeof(int));
-		server_send(sv, p1, action, sizeof(int)*2);
+        if(!game_over(player1_hitvec, player2_hitvec)) {
+    		fprintf(stderr, "Sending message... status: %d\n", server_send(sv, p2, &p_turn, sizeof(int)));
+    		fprintf(stderr, "Sending message... status: %d\n", server_send(sv, p1, &p_not_turn, sizeof(int)));
+    		fprintf(stderr, "Awaiting player response.. status: %d\n", server_recv(sv, p2, action, sizeof(int)*2, &msglen));
+    		if(p1 == 1)
+    			hit = check_hit(action, player1_board_x, player1_board_y, player1_hitvec);
+    		else
+    			hit = check_hit(action, player2_board_x, player2_board_y, player2_hitvec);
+    		server_send(sv, p2, &hit, sizeof(int));
+    		server_send(sv, p1, &hit, sizeof(int));
+    		server_send(sv, p1, action, sizeof(int)*2);
+        }
 	}
 
 	server_close(sv);
@@ -505,39 +507,56 @@ int check_hit(int pos[2], int *board_x, int *board_y, int *hitvec) {
 	return FALSE;
 }
 
-int game_over(int *hitvec) {
-	for(int i=0; i < NUMBERBOATS; i++) {
+int game_over(int *hitvec1, int *hitvec2) {
+    int p1_over = TRUE;
+	int p2_over = TRUE;
+
+    for(int i=0; i < NUMBERBOATS; i++) {
 		if(i == 0) {
 			for(int j=0; j < 5; j++) {
-				if(hitvec[i*5 + j] == FALSE) {
-					return FALSE;
+				if(hitvec1[i*5 + j] == FALSE) {
+					p1_over = FALSE;
 				}
+                if(hitvec2[i*5 + j] == FALSE) {
+                    p2_over = FALSE;
+                }
+
 			}
 		}
 		if(i == 1 || i == 2) {
 			for(int j=0; j < 4; j++) {
-				if(hitvec[i*5 + j] == FALSE) {
-					return FALSE;
+				if(hitvec1[i*5 + j] == FALSE) {
+					p1_over = FALSE;
 				}
+                if(hitvec2[i*5 + j] == FALSE) {
+                    p2_over = FALSE;
+                }
 			}
 		}
 		if(i == 2 || i == 3 || i == 4) {
 			for(int j=0; j < 3; j++) {
-				if(hitvec[i*5 + j] == FALSE) {
-					return FALSE;
+				if(hitvec1[i*5 + j] == FALSE) {
+					p1_over = FALSE;
 				}
+                if(hitvec2[i*5 + j] == FALSE) {
+                    p2_over = FALSE;
+                }
 			}
 		}
 		if(i == 5 || i == 6 || i == 7 || i == 8) {
 			for(int j=0; j < 2; j++) {
-				if(hitvec[i*5 + j] == FALSE) {
-					return FALSE;
+				if(hitvec1[i*5 + j] == FALSE) {
+					p1_over = FALSE;
 				}
+                if(hitvec2[i*5 + j] == FALSE) {
+                    p2_over = FALSE;
+                }
+
 			}
 		}
 	}
 
-	return TRUE;
+	return (p1_over || p2_over);
 }
 
 void addLog(char **log, char *message) {
