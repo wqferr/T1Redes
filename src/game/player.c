@@ -77,3 +77,10 @@ void drawSquareSelected(int y, int x) {
 	mvaddch(y+1, x+2, ACS_VLINE | COLOR_PAIR(2));
 	mvaddch(y+2, x+1, ACS_HLINE | COLOR_PAIR(2));
 }
+
+void drawLog(char **log) {
+	for (int i = 0; i < LOGSIZE; i++) {
+		move(i, 0);
+		wprintw(stdscr, "%s", log[i]);
+	}
+}
