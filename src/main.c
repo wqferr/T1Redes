@@ -571,7 +571,9 @@ int check_hit(int pos[2], int *board_x, int *board_y, int *hitvec, int *which) {
 }
 
 int is_down(int *hitvec, int boat) {
-    for (int j = 0; j < 5; j++) {
+    int boats[] = {5, 4, 4, 3, 3, 3, 2, 2, 2, 2};
+
+    for (int j = 0; j < boats[boat]; j++) {
         if(hitvec[boat*5 + j] == FALSE) {
             return FALSE;
         }
