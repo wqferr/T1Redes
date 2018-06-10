@@ -12,6 +12,9 @@
 #include "net/address.h"
 #include "game/player.h"
 
+#define FALSE 0
+#define TRUE 1
+
 #define DEFAULT_PORT 7277
 #define DEFAULT_SERVER_IP "127.0.0.1"
 
@@ -23,6 +26,7 @@
 
 int startClient(const char *serverip, int port);
 int startServer(int port);
+int check_hit(int pos[2], int *board_x, int *board_y, int *hitvec);
 int game_over();
 
 int main(int argc, char *argv[]) {
@@ -130,8 +134,10 @@ int startClient(const char *serverip, int port) {
 
     drawDivision();
 
-    while(!game_over()) {
-        
+    while(TRUE ) {
+        move(0,0);
+        wprintw(stdscr, "state: %d", state);
+        wrefresh(stdscr);
         int ch = getch();
         if (ch == 'q') {
             break;
@@ -258,9 +264,17 @@ int startClient(const char *serverip, int port) {
             }
             else if (state == 3) {
                 state = 4;
-                // insira aqui mandar para o puto
-                boardenemy[i][j] = 2; // Acertou.
-                boardenemy[i][j] = 3; // Errou.
+                int *attack_coords = (int *) malloc(sizeof(int) * 2);
+                int hit;
+                attack_coords[0] = i;
+                attack_coords[1] = j;
+                client_send(cl, attack_coords, sizeof(int) * 2);
+                client_recv(cl, &hit, sizeof(int), &msglen);
+                
+                if(hit)
+                    boardenemy[i][j] = 2; // Acertou.
+                else
+                    boardenemy[i][j] = 3; // Errou.
             }
         }
         else if (ch == KEY_RESIZE) {
@@ -301,14 +315,42 @@ int startClient(const char *serverip, int port) {
                 addch(' ');
             }
         }
-        else {
+        else if (state == 3) {
             drawSquare(row/2-BOARDSIZEY+2*i, col/2+2+2*j);
+        }
+        else if (state == 4) {
+            int turn_buf;
+            client_recv(cl, &turn_buf, sizeof(int), &msglen);
+                        
+            if(turn_buf == 1) {
+                state = 3;
+                move(1,0);
+                wprintw(stdscr, "turn");
+                wrefresh(stdscr);
+            }
+            else {
+                int hit, *where;
+                where = (int *) malloc(sizeof(int) * 2);
+                client_recv(cl, &hit, sizeof(int), &msglen);
+                client_recv(cl, where, sizeof(int)*2, &msglen);
+                move(1,0);
+                wprintw(stdscr, "4: %d - %d", where[0], where[1]);
+                wrefresh(stdscr);
+                if(hit == 1) {
+                    board[where[0]][where[1]] = 2;
+                } else {
+                    board[where[0]][where[1]] = 3;
+                }
+            }
         }
     }
     
-    for (int k = 0; k < BOARDSIZEY; k++)
+    for (int k = 0; k < BOARDSIZEY; k++) {
         free(board[k]);
+        free(boardenemy[k]);
+    }
     free(board);
+    free(boardenemy);
 
     client_close(cl);
     free(buf);
@@ -386,31 +428,45 @@ int startServer(int port) {
         }
     }
 
-    // memset(buf, 0, 255);
-    // strcpy(buf, "Randomly selecting first player.");
-    // fprintf(stderr, "Sending player selection message... status: %d\n", server_send(sv, 0, buf, strlen(buf)));
-    // fprintf(stderr, "Sending player selection message... status: %d\n", server_send(sv, 1, buf, strlen(buf)));
-    int r = rand() % 2;
-    // memset(buf, 0, 255);
-    // sprintf(buf, "Player %d was selected to go first", r);
-    // fprintf(stderr, "Sending player selected message... status: %d\n", server_send(sv, 0, buf, strlen(buf)));
-    // fprintf(stderr, "Sending player selected message... status: %d\n", server_send(sv, 1, buf, strlen(buf)));
+    fprintf(stderr, "Selecting playing order...\n");
 
-    int i = 0;
+    int p1 = rand() % 2;
+    int p2 = (p1+1) % 2;
+    fprintf(stderr, "Player %d was selected to go first\n", p1);
+
+    int *player1_hitvec = (int *) calloc(NUMBERBOATS*5, sizeof(int));
+    int *player2_hitvec = (int *) calloc(NUMBERBOATS*5, sizeof(int));
+
     while(TRUE) {
-        // // at this point, client reads if it is its turn
-        // sprintf(buf, "%d", r);
-        // fprintf(stderr, "Sending message... status: %d\n", server_send(sv, 0, buf, strlen(buf)));
-        // fprintf(stderr, "Sending message... status: %d\n", server_send(sv, 1, buf, strlen(buf)));
-        // fprintf(stderr, "Awaiting player action.. status: %d\n", server_recv(sv, r, buf, BUF_SIZE, &msglen));
-        // // TODO: get response and act on it    
+        const int p_turn = 1;
+        const int p_not_turn = 0;
+        int *action = (int *) malloc(sizeof(int) * 2);
+        int hit;
+        // at this point, client reads if it is its turn
+        fprintf(stderr, "Sending message... status: %d\n", server_send(sv, p1, &p_turn, sizeof(int)));
+        fprintf(stderr, "Sending message... status: %d\n", server_send(sv, p2, &p_not_turn, sizeof(int)));
+        fprintf(stderr, "Awaiting player action.. status: %d\n", server_recv(sv, p1, action, sizeof(int)*2, &msglen));
+        
+        fprintf(stderr, "%d - %d\n", action[0], action[1]);
+        if(p1 == 0)
+            hit = check_hit(action, player2_board_x, player2_board_y, player2_hitvec);
+        else
+            hit = check_hit(action, player1_board_x, player1_board_y, player1_hitvec);
+        fprintf(stderr, "hit: %d\n", hit);
+        server_send(sv, p1, &hit, sizeof(int));
+        server_send(sv, p2, &hit, sizeof(int));
+        server_send(sv, p2, action, sizeof(int)*2);
 
-        // sprintf(buf, "%d", (r+1)%2);
-        // fprintf(stderr, "Sending message... status: %d\n", server_send(sv, 0, buf, strlen(buf)));
-        // fprintf(stderr, "Sending message... status: %d\n", server_send(sv, 1, buf, strlen(buf)));
-        // fprintf(stderr, "Awaiting player response.. status: %d\n", server_recv(sv, (r+1)%2, buf, BUF_SIZE, &msglen));
-        // // TODO: get response and act on it    
-        // i++;
+        fprintf(stderr, "Sending message... status: %d\n", server_send(sv, p2, &p_turn, sizeof(int)));
+        fprintf(stderr, "Sending message... status: %d\n", server_send(sv, p1, &p_not_turn, sizeof(int)));
+        fprintf(stderr, "Awaiting player response.. status: %d\n", server_recv(sv, p2, action, sizeof(int)*2, &msglen));
+        if(p1 == 1)
+            hit = check_hit(action, player1_board_x, player1_board_y, player1_hitvec);
+        else
+            hit = check_hit(action, player2_board_x, player2_board_y, player2_hitvec);
+        server_send(sv, p2, &hit, sizeof(int));
+        server_send(sv, p1, &hit, sizeof(int));
+        server_send(sv, p1, action, sizeof(int)*2);
     }
 
     server_close(sv);
@@ -419,6 +475,49 @@ int startServer(int port) {
     return EXIT_SUCCESS;
 }
 
-int game_over() {
-    return 0;
+int check_hit(int pos[2], int *board_x, int *board_y, int *hitvec) {
+    for(int i=0; i < NUMBERBOATS; i++) {
+        for(int j=0; j < 5; j++) {
+            if(board_x[i*5 + j] == pos[0] && board_y[i*5 +j] == pos[1]) {
+                hitvec[i*5 + j] = TRUE;
+                return TRUE;
+            }
+        }
+    }
+    return FALSE;
+}
+
+int game_over(int *hitvec) {
+    for(int i=0; i < NUMBERBOATS; i++) {
+        if(i == 0) {
+            for(int j=0; j < 5; j++) {
+                if(hitvec[i*5 + j] == FALSE) {
+                    return FALSE;
+                }
+            }
+        }
+        if(i == 1 || i == 2) {
+            for(int j=0; j < 4; j++) {
+                if(hitvec[i*5 + j] == FALSE) {
+                    return FALSE;
+                }
+            }
+        }
+        if(i == 2 || i == 3 || i == 4) {
+            for(int j=0; j < 3; j++) {
+                if(hitvec[i*5 + j] == FALSE) {
+                    return FALSE;
+                }
+            }
+        }
+        if(i == 5 || i == 6 || i == 7 || i == 8) {
+            for(int j=0; j < 2; j++) {
+                if(hitvec[i*5 + j] == FALSE) {
+                    return FALSE;
+                }
+            }
+        }
+    }
+
+    return TRUE;
 }
