@@ -110,8 +110,10 @@ int startClient(const char *serverip, int port) {
         board[k] = (int *) calloc(BOARDSIZEX, sizeof(int));
     }
 
-    boats_x_coords = (int *) calloc(NUMBERBOATS*5, sizeof(int));
-    boats_y_coords = (int *) calloc(NUMBERBOATS*5, sizeof(int));
+    boats_x_coords = (int *) malloc(sizeof(int)*NUMBERBOATS*5);
+    boats_y_coords = (int *) malloc(sizeof(int)*NUMBERBOATS*5);
+    memset(boats_x_coords, -1, sizeof(int)*NUMBERBOATS*5);
+    memset(boats_y_coords, -1, sizeof(int)*NUMBERBOATS*5);
 
     initscr();
     cbreak();
@@ -237,9 +239,9 @@ int startClient(const char *serverip, int port) {
                     clear();
                     drawDivision();
 
-                    for (int k = 0; k < 5; k++)
+                    for (int k = 0; k < boats[now]; k++)
                         boats_x_coords[now*5 + k] = boat_x[k];
-                    for (int k = 0; k < 5; k++)
+                    for (int k = 0; k < boats[now]; k++)
                         boats_y_coords[now*5 + k] = boat_y[k];
 
                     state = 0;
@@ -348,31 +350,31 @@ int startServer(int port) {
     fprintf(stderr, "Sending ship placement message... status: %d\n", server_send(sv, 0, buf, strlen(buf)));
     fprintf(stderr, "Sending ship placement message... status: %d\n", server_send(sv, 1, buf, strlen(buf)));
     
-    int *player1_board_x = (int *) malloc(sizeof(int)*NUMBERBOATS* 5);
-    int *player1_board_y = (int *) malloc(sizeof(int)*NUMBERBOATS * 5);
-    fprintf(stderr, "Awaiting ship placement... status: %d\n", server_recv(sv, 0, int_buf, sizeof(int)*NUMBERBOATS*5, &msglen));
-    memcpy(player1_board_x, int_buf, sizeof(int)*NUMBERBOATS*5);
-    fprintf(stderr, "Awaiting ship placement... status: %d\n", server_recv(sv, 0, int_buf, sizeof(int)*NUMBERBOATS*5, &msglen));
-    memcpy(player1_board_y, int_buf, sizeof(int)*NUMBERBOATS*5);
+    int *player1_board_x = (int *) malloc(sizeof(int)*NUMBERBOATS*5);
+    int *player1_board_y = (int *) malloc(sizeof(int)*NUMBERBOATS*5);
+    fprintf(stderr, "Awaiting ship placement... status: %d\n", server_recv(sv, 0, player1_board_x, sizeof(int)*NUMBERBOATS*5, &msglen));
+    //memcpy(player1_board_x, int_buf, sizeof(int)*NUMBERBOATS*5);
+    fprintf(stderr, "Awaiting ship placement... status: %d\n", server_recv(sv, 0, player1_board_y, sizeof(int)*NUMBERBOATS*5, &msglen));
+    // memcpy(player1_board_y, int_buf, sizeof(int)*NUMBERBOATS*5);
     
     for(int i=0; i<NUMBERBOATS; i++) {
         for(int j=0; j<5; j++) {
-            fprintf(stderr, "(%d - ", player1_board_x[i*5 +j]);
+            fprintf(stderr, "p1: (%d - ", player1_board_x[i*5 + j]);
             fprintf(stderr, "%d)\n", player1_board_y[i*5 + j]);
         }
     }
 
     int *player2_board_x = (int *) malloc(sizeof(int)*NUMBERBOATS*5);
     int *player2_board_y = (int *) malloc(sizeof(int)*NUMBERBOATS*5);
-    fprintf(stderr, "Awaiting ship placement... status: %d\n", server_recv(sv, 1, int_buf, sizeof(int)*NUMBERBOATS*5, &msglen));
-    memcpy(player2_board_x, int_buf, sizeof(int)*NUMBERBOATS*5);
-    fprintf(stderr, "Awaiting ship placement... status: %d\n", server_recv(sv, 1, int_buf, sizeof(int)*NUMBERBOATS*5, &msglen));
-    memcpy(player2_board_y, int_buf, sizeof(int)*NUMBERBOATS*5);
+    fprintf(stderr, "Awaiting ship placement... status: %d\n", server_recv(sv, 1, player2_board_x, sizeof(int)*NUMBERBOATS*5, &msglen));
+    // memcpy(player2_board_x, int_buf, sizeof(int)*NUMBERBOATS*5);
+    fprintf(stderr, "Awaiting ship placement... status: %d\n", server_recv(sv, 1, player2_board_y, sizeof(int)*NUMBERBOATS*5, &msglen));
+    // memcpy(player2_board_y, int_buf, sizeof(int)*NUMBERBOATS*5);
 
     for(int i=0; i<NUMBERBOATS; i++) {
         for(int j=0; j<5; i++) {
-            fprintf(stderr, "(%d - ", player2_board_x[i][j]);
-            fprintf(stderr, "%d)\n", player2_board_y[i][j]);
+            fprintf(stderr, "p2: (%d - ", player2_board_x[i*5 + j]);
+            fprintf(stderr, "%d)\n", player2_board_y[i*5 + j]);
         }
     }
 
