@@ -188,15 +188,20 @@ int startClient(const char *serverip, int port) {
 				}   
 			}
 		}
-		else if (ch == 10) {
-			if (state == 0) {
+		else if (ch == 'x') {
+			if (state == 1) {
+				state = 0;
+			}
+		}
+		else if (ch == 10) { // ENTER
+			if (state == 0) { // Lock position to place boats
 				if (board[i][j] == 0) {
 					state = 1;
 					selectx = i;
 					selecty = j;
 				}
 			}
-			else if (state == 1) {
+			else if (state == 1) { // Place boats
 				int invalid = 0;
 
 				if (direction == 0) {
@@ -342,10 +347,10 @@ int startClient(const char *serverip, int port) {
 			drawLog(log);
 		}
 
-		if (state == 0) {
+		if (state == 0) { // Selecting square to place boat
 			drawSquare(row/2-BOARDSIZEY+2*i, col/2-2*BOARDSIZEX-2+2*j);
 		}
-		else if (state == 1) {
+		else if (state == 1) { // Selecting direction to place boat
 			if (direction == 0 && i+boats[now] < BOARDSIZEY) {
 				for (int k = 0; k < boats[now]; k++) {
 					drawSquareSelected(row/2-BOARDSIZEY+2*(i+k), col/2-2*BOARDSIZEX-2+2*j);
@@ -370,7 +375,7 @@ int startClient(const char *serverip, int port) {
 				addch(' ');
 			}
 		}
-		else if (state == 3) {
+		else if (state == 3) { // Select square to attack
 			drawSquare(row/2-BOARDSIZEY+2*i, col/2+2+2*j);
 		} // idle state, waiting for other player to act
 		else if (state == 4) {

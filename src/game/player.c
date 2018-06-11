@@ -6,6 +6,7 @@
 #include "game/player.h"
 
 void drawBoard(int **board, int y, int x) {
+	// Draw board first line
 	move(y, x);
 	addch(ACS_ULCORNER);
 	for(int i = 0; i < BOARDSIZEX-1; i++) {
@@ -15,6 +16,7 @@ void drawBoard(int **board, int y, int x) {
 	addch(ACS_HLINE);
 	addch(ACS_URCORNER);
 
+	// Draw board middle lines
 	for(int i = 0; i < BOARDSIZEY; i++) {
 		move(y+2*(i+1), x);
 		
@@ -29,20 +31,21 @@ void drawBoard(int **board, int y, int x) {
 		move(y+2*i+1, x);
 		for(int j = 0; j < BOARDSIZEX; j++) {
 			addch(ACS_VLINE);
-			if (board[i][j] == 0)
+			if (board[i][j] == 0) // If square empty
 				addch(' ');
-			else if (board[i][j] == 1)
+			else if (board[i][j] == 1) // If square has ship
 				addch('o');
-			else if (board[i][j] == 2)
+			else if (board[i][j] == 2) // If already hit
 				addch('x');
-			else if (board[i][j] == 3)
+			else if (board[i][j] == 3) // If missed
 				addch('.');
-			else
+			else // Error
 				addch('*');
 		}
 		addch(ACS_VLINE);
 	}
 
+	// Draw board last line
 	move(y+2*BOARDSIZEY, x);
 	addch(ACS_LLCORNER);
 	for(int i = 0; i < BOARDSIZEX-1; i++) {
@@ -79,6 +82,7 @@ void drawSquareSelected(int y, int x) {
 }
 
 void drawLog(char **log) {
+	// For each log draw line
 	for (int i = 0; i < LOGSIZE; i++) {
 		move(i, 0);
 		wprintw(stdscr, "                                                  ");
@@ -92,8 +96,11 @@ void drawWinScreen() {
 
 	clear();
 
-	box(stdscr, 0, 0);
+	// Draw blinking outter border
+	// box(stdscr, 0, 0);
+	wborder(stdscr, ACS_VLINE | A_BLINK | COLOR_PAIR(1), ACS_VLINE | A_BLINK | COLOR_PAIR(1), ACS_HLINE | A_BLINK | COLOR_PAIR(1), ACS_HLINE | A_BLINK | COLOR_PAIR(1), ACS_ULCORNER | A_BLINK | COLOR_PAIR(1), ACS_URCORNER | A_BLINK | COLOR_PAIR(1), ACS_LLCORNER | A_BLINK | COLOR_PAIR(1), ACS_LRCORNER | A_BLINK | COLOR_PAIR(1));
 
+	// Draw text
 	getmaxyx(stdscr, row, col);
 
 	move(row/2-6, col/2-23/2);
@@ -127,8 +134,11 @@ void drawLooseScreen() {
 
 	clear();
 
-	box(stdscr, 0, 0);
+	// Draw blinking outter border
+	// box(stdscr, 0, 0);
+	wborder(stdscr, ACS_VLINE | A_BLINK | COLOR_PAIR(1), ACS_VLINE | A_BLINK | COLOR_PAIR(1), ACS_HLINE | A_BLINK | COLOR_PAIR(1), ACS_HLINE | A_BLINK | COLOR_PAIR(1), ACS_ULCORNER | A_BLINK | COLOR_PAIR(1), ACS_URCORNER | A_BLINK | COLOR_PAIR(1), ACS_LLCORNER | A_BLINK | COLOR_PAIR(1), ACS_LRCORNER | A_BLINK | COLOR_PAIR(1));
 
+	// Draw text
 	getmaxyx(stdscr, row, col);
 
 	move(row/2-6, col/2-29/2);
