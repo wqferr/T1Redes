@@ -118,6 +118,8 @@ void drawWinScreen() {
 	wprintw(stdscr, "    \\  /\\  /  | | | | |");
 	move(row/2+4, col/2-23/2);
 	wprintw(stdscr, "     \\/  \\/   |_|_| |_|");
+	move(row/2+5, col/2-16/2);
+	wprintw(stdscr, "Press Q to exit.");
 }
 
 void drawLooseScreen() {
@@ -149,4 +151,6 @@ void drawLooseScreen() {
 	wprintw(stdscr, " | |___| (_) | (_) \\__ \\  __/");
 	move(row/2+3, col/2-29/2);
 	wprintw(stdscr, " |______\\___/ \\___/|___/\\___|");
+	move(row/2+5, col/2-16/2);
+	wprintw(stdscr, "Press Q to exit.");
 }
