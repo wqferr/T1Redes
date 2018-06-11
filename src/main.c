@@ -419,9 +419,11 @@ int startClient(const char *serverip, int port) {
 		}
 		else if (state == 999) {
 			drawWinScreen();
+			state = 10000;
 		}
 		else if (state == 9999) {
 			drawLooseScreen();
+			state = 10000;
 		}
 	}
 	
