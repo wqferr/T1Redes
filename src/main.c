@@ -325,12 +325,14 @@ int startClient(const char *serverip, int port) {
 			drawDivision();
 		}
 
-		getmaxyx(stdscr, row, col);
+		if (state != 10000) {
+			getmaxyx(stdscr, row, col);
 
-		drawBoard(board, row/2-BOARDSIZEY, col/2-2*BOARDSIZEX-2);
-		drawBoard(boardenemy, row/2-BOARDSIZEY, col/2+2);
+			drawBoard(board, row/2-BOARDSIZEY, col/2-2*BOARDSIZEX-2);
+			drawBoard(boardenemy, row/2-BOARDSIZEY, col/2+2);
 
-		drawLog(log);
+			drawLog(log);
+		}
 
 		if (state == 0) {
 			drawSquare(row/2-BOARDSIZEY+2*i, col/2-2*BOARDSIZEX-2+2*j);
@@ -419,9 +421,11 @@ int startClient(const char *serverip, int port) {
 		}
 		else if (state == 999) {
 			drawWinScreen();
+			state = 10000;
 		}
 		else if (state == 9999) {
 			drawLooseScreen();
+			state = 10000;
 		}
 	}
 	

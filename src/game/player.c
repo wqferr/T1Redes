@@ -96,30 +96,30 @@ void drawWinScreen() {
 
 	getmaxyx(stdscr, row, col);
 
-	move(row/2-6, col/2-39/2);
-	wprintw(stdscr, " ____  _        _ __   _______ ____  _ ");
-	move(row/2-5, col/2-39/2);
-	wprintw(stdscr, "|  _ \\| |      / \\\\ \\ / / ____|  _ \\/ |");
-	move(row/2-4, col/2-39/2);
-	wprintw(stdscr, "| |_) | |     / _ \\\\ V /|  _| | |_) | |");
-	move(row/2-3, col/2-39/2);
-	wprintw(stdscr, "|  __/| |___ / ___ \\| | | |___|  _ <| |");
-	move(row/2-2, col/2-39/2);
-	wprintw(stdscr, "|_|   |_____/_/   \\_\\_| |_____|_| \\_\\_|");
-	move(row/2-1, col/2-39/2);
-	wprintw(stdscr, "                                       ");
-	move(row/2, col/2-39/2);
-	wprintw(stdscr, "__        ___       ");
-	move(row/2+1, col/2-39/2);
-	wprintw(stdscr, "\\ \\      / (_)_ __  ");
-	move(row/2+2, col/2-39/2);
-	wprintw(stdscr, " \\ \\ /\\ / /| | '_ \\ ");
-	move(row/2+3, col/2-39/2);
-	wprintw(stdscr, "  \\ V  V / | | | | |");
-	move(row/2+4, col/2-39/2);
-	wprintw(stdscr, "   \\_/\\_/  |_|_| |_|");
-	move(row/2+5, col/2-39/2);
-	wprintw(stdscr, "                    ");
+	move(row/2-6, col/2-23/2);
+	wprintw(stdscr, " __     __             ");
+	move(row/2-5, col/2-23/2);
+	wprintw(stdscr, " \\ \\   / /             ");
+	move(row/2-4, col/2-23/2);
+	wprintw(stdscr, "  \\ \\_/ /__  _   _     ");
+	move(row/2-3, col/2-23/2);
+	wprintw(stdscr, "   \\   / _ \\| | | |    ");
+	move(row/2-2, col/2-23/2);
+	wprintw(stdscr, "    | | (_) | |_| |    ");
+	move(row/2-1, col/2-23/2);
+	wprintw(stdscr, " __ |_|\\___/ \\__,_|    ");
+	move(row/2, col/2-23/2);
+	wprintw(stdscr, " \\ \\        / (_)      ");
+	move(row/2+1, col/2-23/2);
+	wprintw(stdscr, "  \\ \\  /\\  / / _ _ __  ");
+	move(row/2+2, col/2-23/2);
+	wprintw(stdscr, "   \\ \\/  \\/ / | | '_ \\ ");
+	move(row/2+3, col/2-23/2);
+	wprintw(stdscr, "    \\  /\\  /  | | | | |");
+	move(row/2+4, col/2-23/2);
+	wprintw(stdscr, "     \\/  \\/   |_|_| |_|");
+	move(row/2+5, col/2-16/2);
+	wprintw(stdscr, "Press Q to exit.");
 }
 
 void drawLooseScreen() {
@@ -131,28 +131,26 @@ void drawLooseScreen() {
 
 	getmaxyx(stdscr, row, col);
 
-	move(row/2-6, col/2-39/2);
-	wprintw(stdscr, " ____  _        _ __   _______ ____  _ ");
-	move(row/2-5, col/2-39/2);
-	wprintw(stdscr, "|  _ \\| |      / \\\\ \\ / / ____|  _ \\/ |");
-	move(row/2-4, col/2-39/2);
-	wprintw(stdscr, "| |_) | |     / _ \\\\ V /|  _| | |_) | |");
-	move(row/2-3, col/2-39/2);
-	wprintw(stdscr, "|  __/| |___ / ___ \\| | | |___|  _ <| |");
-	move(row/2-2, col/2-39/2);
-	wprintw(stdscr, "|_|   |_____/_/   \\_\\_| |_____|_| \\_\\_|");
-	move(row/2-1, col/2-39/2);
-	wprintw(stdscr, "                                       ");
-	move(row/2, col/2-38/2);
-	wprintw(stdscr, "__                                    ");
-	move(row/2+1, col/2-38/2);
-	wprintw(stdscr, "| |                                   ");
-	move(row/2+2, col/2-38/2);
-	wprintw(stdscr, "| |       ___ ___  ____               ");
-	move(row/2+3, col/2-38/2);
-	wprintw(stdscr, "| |       | | | | | |  /  __\\  ____");
-	move(row/2+4, col/2-38/2);
-	wprintw(stdscr, "| |______ | | | | | | |__    | /  ___\\");
-	move(row/2+5, col/2-38/2);
-	wprintw(stdscr, "|________| |___| |___|  \\____/ \\____/");
+	move(row/2-6, col/2-29/2);
+	wprintw(stdscr, " __     __                   ");
+	move(row/2-5, col/2-29/2);
+	wprintw(stdscr, " \\ \\   / /                   ");
+	move(row/2-4, col/2-29/2);
+	wprintw(stdscr, "  \\ \\_/ /__  _   _           ");
+	move(row/2-3, col/2-29/2);
+	wprintw(stdscr, "   \\   / _ \\| | | |          ");
+	move(row/2-2, col/2-29/2);
+	wprintw(stdscr, "  _ | | (_) | |_| |          ");
+	move(row/2-1, col/2-29/2);
+	wprintw(stdscr, " | ||_|\\___/ \\__,_|          ");
+	move(row/2, col/2-29/2);
+	wprintw(stdscr, " | |     ___   ___  ___  ___ ");
+	move(row/2+1, col/2-29/2);
+	wprintw(stdscr, " | |    / _ \\ / _ \\/ __|/ _ \\");
+	move(row/2+2, col/2-29/2);
+	wprintw(stdscr, " | |___| (_) | (_) \\__ \\  __/");
+	move(row/2+3, col/2-29/2);
+	wprintw(stdscr, " |______\\___/ \\___/|___/\\___|");
+	move(row/2+5, col/2-16/2);
+	wprintw(stdscr, "Press Q to exit.");
 }
