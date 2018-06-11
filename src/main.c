@@ -294,23 +294,21 @@ int startClient(const char *serverip, int port) {
                     addLog(log, auxlog);
                 }
 
-                if (ship_down != -1) {
-                    if(ship_down == 0) {
-                        sprintf(auxlog, "Enemy Carrier down!");
-                        addLog(log, auxlog);
-                    } 
-                    else if(ship_down == 1) {
-                        sprintf(auxlog, "Enemy Battleship down!");
-                        addLog(log, auxlog);
-                    }
-                    else if(ship_down == 2) {
-                        sprintf(auxlog, "Enemy Cruiser down!");
-                        addLog(log, auxlog);
-                    }
-                    else if(ship_down == 3) {
-                        sprintf(auxlog, "Enemy Destroyer down!");
-                        addLog(log, auxlog);
-                    }
+                if(ship_down == 0) {
+                    sprintf(auxlog, "Enemy Carrier down!");
+                    addLog(log, auxlog);
+                } 
+                else if(ship_down == 1) {
+                    sprintf(auxlog, "Enemy Battleship down!");
+                    addLog(log, auxlog);
+                }
+                else if(ship_down == 2) {
+                    sprintf(auxlog, "Enemy Cruiser down!");
+                    addLog(log, auxlog);
+                }
+                else if(ship_down == 3) {
+                    sprintf(auxlog, "Enemy Destroyer down!");
+                    addLog(log, auxlog);
                 }
 
 
@@ -392,23 +390,21 @@ int startClient(const char *serverip, int port) {
                     addLog(log, auxlog);
                 }
 
-                if (ship_down != -1) {
-                    if(ship_down == 0) {
-                        sprintf(auxlog, "Carrier down!");
-                        addLog(log, auxlog);
-                    } 
-                    else if(ship_down == 1) {
-                        sprintf(auxlog, "Battleship down!");
-                        addLog(log, auxlog);
-                    }
-                    else if(ship_down == 2) {
-                        sprintf(auxlog, "Cruiser down!");
-                        addLog(log, auxlog);
-                    }
-                    else if(ship_down == 3) {
-                        sprintf(auxlog, "Destroyer down!");
-                        addLog(log, auxlog);
-                    }
+                if(ship_down == 0) {
+                    sprintf(auxlog, "Carrier down!");
+                    addLog(log, auxlog);
+                } 
+                else if(ship_down == 1) {
+                    sprintf(auxlog, "Battleship down!");
+                    addLog(log, auxlog);
+                }
+                else if(ship_down == 2) {
+                    sprintf(auxlog, "Cruiser down!");
+                    addLog(log, auxlog);
+                }
+                else if(ship_down == 3) {
+                    sprintf(auxlog, "Destroyer down!");
+                    addLog(log, auxlog);
                 }
 
                 if(is_over) {
@@ -507,6 +503,7 @@ int startServer(int port) {
             hit = check_hit(action, player2_board_x, player2_board_y, player2_hitvec, &which);
         else
             hit = check_hit(action, player1_board_x, player1_board_y, player1_hitvec, &which);
+        fprintf(stderr, "%d\n", which);
         fprintf(stderr, "Sending hit info message... status: %d\n", server_send(sv, p1, &hit, sizeof(int)));
         fprintf(stderr, "Sending hit info message... status: %d\n", server_send(sv, p2, &hit, sizeof(int)));
         fprintf(stderr, "Sending hit location message... status: %d\n", server_send(sv, p2, action, sizeof(int)*2));
@@ -526,6 +523,8 @@ int startServer(int port) {
                 hit = check_hit(action, player1_board_x, player1_board_y, player1_hitvec, &which);
             else
                 hit = check_hit(action, player2_board_x, player2_board_y, player2_hitvec, &which);
+            
+            fprintf(stderr, "%d\n", which);
             fprintf(stderr, "Sending hit info message... status: %d\n", server_send(sv, p2, &hit, sizeof(int)));
             fprintf(stderr, "Sending hit info message... status: %d\n", server_send(sv, p1, &hit, sizeof(int)));
             fprintf(stderr, "Sending hit location message... status: %d\n", server_send(sv, p1, action, sizeof(int)*2));
@@ -546,8 +545,9 @@ int startServer(int port) {
 }
 
 int check_hit(int pos[2], int *board_x, int *board_y, int *hitvec, int *which) {
+    int boats[] = {5, 4, 4, 3, 3, 3, 2, 2, 2, 2};
     for(int i=0; i < NUMBERBOATS; i++) {
-        for(int j=0; j < 5; j++) {
+        for(int j=0; j < boats[i]; j++) {
             if(board_x[i*5 + j] == pos[0] && board_y[i*5 +j] == pos[1]) {
                 hitvec[i*5 + j] = TRUE;
                 if(i == 0) {
@@ -585,47 +585,15 @@ int game_over(int *hitvec1, int *hitvec2) {
     int p1_over = TRUE;
     int p2_over = TRUE;
 
+    int boats[] = {5, 4, 4, 3, 3, 3, 2, 2, 2, 2};
+
     for(int i=0; i < NUMBERBOATS; i++) {
-        if(i == 0) {
-            for(int j=0; j < 5; j++) {
-                if(hitvec1[i*5 + j] == FALSE) {
-                    p1_over = FALSE;
-                }
-                if(hitvec2[i*5 + j] == FALSE) {
-                    p2_over = FALSE;
-                }
-
+        for(int j=0; j < boats[i]; j++) {
+            if(hitvec1[i*5 + j] == FALSE) {
+                p1_over = FALSE;
             }
-        }
-        if(i == 1 || i == 2) {
-            for(int j=0; j < 4; j++) {
-                if(hitvec1[i*5 + j] == FALSE) {
-                    p1_over = FALSE;
-                }
-                if(hitvec2[i*5 + j] == FALSE) {
-                    p2_over = FALSE;
-                }
-            }
-        }
-        if(i == 3 || i == 4 || i == 5) {
-            for(int j=0; j < 3; j++) {
-                if(hitvec1[i*5 + j] == FALSE) {
-                    p1_over = FALSE;
-                }
-                if(hitvec2[i*5 + j] == FALSE) {
-                    p2_over = FALSE;
-                }
-            }
-        }
-        if(i == 6 || i == 7 || i == 8 || i == 9) {
-            for(int j=0; j < 2; j++) {
-                if(hitvec1[i*5 + j] == FALSE) {
-                    p1_over = FALSE;
-                }
-                if(hitvec2[i*5 + j] == FALSE) {
-                    p2_over = FALSE;
-                }
-
+            if(hitvec2[i*5 + j] == FALSE) {
+                p2_over = FALSE;
             }
         }
     }
