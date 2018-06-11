@@ -13,5 +13,7 @@ void drawDivision();
 void drawSquare(int y, int x);
 void drawSquareSelected(int y, int x);
 void drawLog(char **log);
+void drawWinScreen();
+void drawLooseScreen();
 
 #endif
