@@ -41,6 +41,7 @@ int main(int argc, char *argv[]) {
 	int status;
 	char *serverip = DEFAULT_SERVER_IP;
 
+    // parses through command line args
 	while ((c = getopt(argc, argv, "sc:p:")) != -1) {
 		switch (c) {
 			case 's':
@@ -65,6 +66,7 @@ int main(int argc, char *argv[]) {
 		}
 	}
 
+    // check hosttype and initializes
 	if (hosttype == CLIENT) {
 		status = startClient(serverip, port);
 		free(serverip);
@@ -74,12 +76,13 @@ int main(int argc, char *argv[]) {
 	return status;
 }
 
-
+// run a client host
 int startClient(const char *serverip, int port) {
-	client *cl;
-	char *buf;
-	size_t msglen;
-	struct sockaddr_in svaddr;
+	client *cl; // client socket
+	char *buf; // generic buffer
+	size_t msglen; // number of bytes received
+	struct sockaddr_in svaddr; // socket info
+    // other variables used for drawing board, message receiving, etc
 	int row, col, i = 0, j = 0, state = 0, selectx = 0, selecty = 0, now = 0, direction = 0;
 	int boats[] = {5, 4, 4, 3, 3, 3, 2, 2, 2, 2};
 	int **board, **boardenemy;
@@ -90,6 +93,7 @@ int startClient(const char *serverip, int port) {
 	fprintf(stderr, "Starting client...\n");
 	fprintf(stderr, "Connecting to server at %s:%d...\n", serverip, port);
 
+    // server socket info for connection
 	svaddr.sin_family = AF_INET;
 	svaddr.sin_addr.s_addr = htonl(iptoint(serverip));
 	svaddr.sin_port = htons(port);
@@ -109,7 +113,6 @@ int startClient(const char *serverip, int port) {
 
 	fprintf(stderr, "Awaiting ship placement server message... ");
 	fprintf(stderr, "status: %d\n", client_recv(cl, buf, BUF_SIZE, &msglen));
-	// fprintf(stderr, "Server said: \"%s\"\n", buf);
 	memset(buf, 0, 255);
 
 	// initialize interface
@@ -264,29 +267,34 @@ int startClient(const char *serverip, int port) {
 
 					if (now >= NUMBERBOATS) {
 						state = 4;
-
+                        // client sends coordinates of boats
 						client_send(cl, boats_x_coords, sizeof(int) * NUMBERBOATS * 5);
 						client_send(cl, boats_y_coords, sizeof(int) * NUMBERBOATS * 5);
 					}
 				}
 			}
+            // select a position to attack
 			else if (state == 3) {
 				state = 4;
 				int *attack_coords = (int *) malloc(sizeof(int) * 2);
 				int hit;
 				attack_coords[0] = i;
 				attack_coords[1] = j;
+                // send position
 				client_send(cl, attack_coords, sizeof(int) * 2);
+                // receive hit info, if a ship went down which ship is it and
+                // if the game is over
 				client_recv(cl, &hit, sizeof(int), &msglen);
 				client_recv(cl, &ship_down, sizeof(int), &msglen);
 				client_recv(cl, &is_over, sizeof(int), &msglen);
 
+                // if hit, draw an x on the board and log it
 				if (hit) {
 					boardenemy[i][j] = 2; // Acertou.
 
 					sprintf(auxlog, "Hit at %d %d!", i, j);
 					addLog(log, auxlog);
-				}
+				} // else draw a dot on board and log it
 				else {
 					boardenemy[i][j] = 3; // Errou.
 
@@ -294,6 +302,7 @@ int startClient(const char *serverip, int port) {
 					addLog(log, auxlog);
 				}
 
+                // if a ship is down put on log its name 
 				if(ship_down == 0) {
 					sprintf(auxlog, "Enemy Carrier down!");
 					addLog(log, auxlog);
@@ -311,20 +320,19 @@ int startClient(const char *serverip, int port) {
 					addLog(log, auxlog);
 				}
 
-
+                // if game over, got to game won screen
 				if(is_over) {
-					sprintf(auxlog, "Game Over! YOU WIN!!!!!", i, j);
-					addLog(log, auxlog);
-
 					state = 999;
 				}
 			}
 		}
+        // handles windows resize (where possible)
 		else if (ch == KEY_RESIZE) {
 			clear();
 			drawDivision();
 		}
 
+        // redraw board only if game isn't over
 		if (state != 10000) {
 			getmaxyx(stdscr, row, col);
 
@@ -364,24 +372,27 @@ int startClient(const char *serverip, int port) {
 		}
 		else if (state == 3) {
 			drawSquare(row/2-BOARDSIZEY+2*i, col/2+2+2*j);
-		}
+		} // idle state, waiting for other player to act
 		else if (state == 4) {
 			wrefresh(stdscr);
 
 			int turn_buf;
+            // receive the indicator for turn
 			client_recv(cl, &turn_buf, sizeof(int), &msglen);
-						
+			
+            // if it's this players turn, move to state 3
 			if(turn_buf == 1) {
 				state = 3;
-			}
+			} // else waits for other player to act
 			else {
 				int hit, *where;
 				where = (int *) malloc(sizeof(int) * 2);
-				client_recv(cl, &hit, sizeof(int), &msglen);
-				client_recv(cl, where, sizeof(int)*2, &msglen);
-				client_recv(cl, &ship_down, sizeof(int), &msglen);
-				client_recv(cl, &is_over, sizeof(int), &msglen);
+				client_recv(cl, &hit, sizeof(int), &msglen); // receive hit info
+				client_recv(cl, where, sizeof(int)*2, &msglen); // receive hit position
+				client_recv(cl, &ship_down, sizeof(int), &msglen); // receive if a ship went down
+				client_recv(cl, &is_over, sizeof(int), &msglen); // receive if game is over
 
+                // put hit on board and log
 				if(hit == 1) {
 					board[where[0]][where[1]] = 2;
 
@@ -393,7 +404,7 @@ int startClient(const char *serverip, int port) {
 					sprintf(auxlog, "Enemy missed at %d %d!", where[0], where[1]);
 					addLog(log, auxlog);
 				}
-
+                // if a ship went down, put it on log
 				if(ship_down == 0) {
 					sprintf(auxlog, "Carrier down!");
 					addLog(log, auxlog);
@@ -411,6 +422,7 @@ int startClient(const char *serverip, int port) {
 					addLog(log, auxlog);
 				}
 
+                // if game is over, move to game over screen
 				if(is_over) {
 					sprintf(auxlog, "Game over! YOU LOSE!!!", where[0], where[1]);
 					addLog(log, auxlog);
@@ -419,10 +431,12 @@ int startClient(const char *serverip, int port) {
 				}
 			}
 		}
+        // draw win screen
 		else if (state == 999) {
 			drawWinScreen();
 			state = 10000;
 		}
+        // draw lose screen
 		else if (state == 9999) {
 			drawLooseScreen();
 			state = 10000;
@@ -444,17 +458,18 @@ int startClient(const char *serverip, int port) {
 	return EXIT_SUCCESS;
 }
 
+// function that runs the server
 int startServer(int port) {
-	server *sv;
-	char *buf;
-	int *int_buf, *player1_hitvec, *player2_hitvec, *action;
-	size_t msglen;
+	server *sv; // server socket
+	char *buf; // generic buffer
+	int *int_buf, *player1_hitvec, *player2_hitvec, *action; // other buffers and hitvectors
+	size_t msglen; // size of received msg
 	struct sockaddr_in svaddr;
 	const int p_turn = 1;
 	const int p_not_turn = 0;
 	int hit, p1, p2, over = FALSE;
 
-	srand(time(NULL));
+	srand(time(NULL)); // randomly selects a player to start
 	p1 = rand() % 2;
 	p2 = (p1+1) % 2;
 
@@ -558,6 +573,7 @@ int startServer(int port) {
 	return EXIT_SUCCESS;
 }
 
+// check if a hit is on a boat and passes to the server if a ship went down
 int check_hit(int pos[2], int *board_x, int *board_y, int *hitvec, int *which) {
 	for (int i = 0; i < NUMBERBOATS*5; i++) {
 		fprintf(stderr, "(%d - %d) ", board_x[i], board_y[i]);
@@ -589,6 +605,7 @@ int check_hit(int pos[2], int *board_x, int *board_y, int *hitvec, int *which) {
 	return FALSE;
 }
 
+// check if a ship went down
 int is_down(int *hitvec, int boat) {
 	int boats[] = {5, 4, 4, 3, 3, 3, 2, 2, 2, 2};
 
@@ -600,6 +617,7 @@ int is_down(int *hitvec, int boat) {
 	return TRUE;
 }
 
+// check if game is over (all ships of a player went down)
 int game_over(int *hitvec1, int *hitvec2) {
 	int p1_over = TRUE;
 	int p2_over = TRUE;
@@ -620,6 +638,7 @@ int game_over(int *hitvec1, int *hitvec2) {
 	return (p1_over || p2_over);
 }
 
+// add text to log
 void addLog(char **log, char *message) {
 	for (int i = 0; i < LOGSIZE-1; i++) {
 		strcpy(log[i], log[i+1]);
